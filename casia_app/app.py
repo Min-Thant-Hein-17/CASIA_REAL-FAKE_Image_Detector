@@ -17,10 +17,9 @@ EMAIL_ADDRESS  = "youremail@gmail.com"
 EMAIL_PASSWORD = "your_16_char_app_password"
 RECEIVER_EMAIL = "youremail@gmail.com"
 
-# ── Fix: Custom BatchNormalization that ignores renorm args ───
+# ── Fix renorm error ─────────────────────────────────────────
 class FixedBatchNormalization(layers.BatchNormalization):
     def __init__(self, **kwargs):
-        # Remove renorm-related args that newer Keras dropped
         kwargs.pop('renorm', None)
         kwargs.pop('renorm_clipping', None)
         kwargs.pop('renorm_momentum', None)
@@ -33,35 +32,27 @@ class FixedBatchNormalization(layers.BatchNormalization):
         config.pop('renorm_momentum', None)
         return super().from_config(config)
 
-# ── Lazy Model Loading ───────────────────────────────────────
+# ── Lazy model loading ───────────────────────────────────────
 _model = None
 
 def get_model():
     global _model
     if _model is None:
         base_dir = os.path.dirname(os.path.abspath(__file__))
-
-        keras_path = os.path.join(base_dir, 'casia_model.keras')
-        h5_path    = os.path.join(base_dir, 'casia_model.h5')
-
         custom_objects = {'BatchNormalization': FixedBatchNormalization}
-
-        if os.path.exists(keras_path):
-            print("Loading casia_model.keras ...")
-            _model = tf.keras.models.load_model(
-                keras_path, custom_objects=custom_objects
-            )
-        elif os.path.exists(h5_path):
-            print("Loading casia_model.h5 ...")
-            _model = tf.keras.models.load_model(
-                h5_path, custom_objects=custom_objects, compile=False
-            )
-        else:
+        for name in ['casia_model.keras', 'casia_model.h5']:
+            path = os.path.join(base_dir, name)
+            if os.path.exists(path):
+                print(f"Loading {name} ...")
+                _model = tf.keras.models.load_model(
+                    path, custom_objects=custom_objects, compile=False
+                )
+                print("Model loaded successfully!")
+                break
+        if _model is None:
             raise FileNotFoundError("No model file found!")
-        print("Model loaded successfully!")
     return _model
 
-# ── Constants ────────────────────────────────────────────────
 IMG_SIZE = (128, 128)
 CLASSES  = ["REAL", "FAKE"]
 
@@ -71,8 +62,6 @@ def preprocess_image(file):
     arr = np.array(img) / 255.0
     return np.expand_dims(arr, axis=0)
 
-
-# ── Routes ───────────────────────────────────────────────────
 
 @app.route('/')
 def home():
@@ -104,24 +93,16 @@ def predict():
                 prob_real  = round(float(probs[0]) * 100, 2)
                 prob_fake  = round(float(probs[1]) * 100, 2)
                 is_fake    = (pred_index == 1)
-
                 file.seek(0)
                 img_data = base64.b64encode(file.read()).decode("utf-8")
                 img_src  = f"data:image/jpeg;base64,{img_data}"
-
             except Exception as e:
                 error = f"Error processing image: {str(e)}"
 
-    return render_template(
-        "predict.html",
-        prediction = prediction,
-        confidence = confidence,
-        prob_real  = prob_real,
-        prob_fake  = prob_fake,
-        img_src    = img_src,
-        is_fake    = is_fake,
-        error      = error
-    )
+    return render_template("predict.html",
+                           prediction=prediction, confidence=confidence,
+                           prob_real=prob_real, prob_fake=prob_fake,
+                           img_src=img_src, is_fake=is_fake, error=error)
 
 
 @app.route('/about')
@@ -139,7 +120,6 @@ def send_email():
     full_name = request.form['name']
     email     = request.form['email']
     message   = request.form['message']
-
     try:
         server = smtplib.SMTP('smtp.gmail.com', 587)
         server.starttls()
@@ -150,37 +130,24 @@ def send_email():
         msg_admin['To']       = RECEIVER_EMAIL
         msg_admin['Subject']  = f"New Contact Message from {full_name}"
         msg_admin['Reply-To'] = email
-        body_admin = f"""
-        New message from CASIA Detector website:
-        Name:    {full_name}
-        Email:   {email}
-        Message: {message}
-        """
-        msg_admin.attach(MIMEText(body_admin, 'plain'))
+        msg_admin.attach(MIMEText(
+            f"Name: {full_name}\nEmail: {email}\nMessage: {message}", 'plain'))
         server.send_message(msg_admin)
 
         msg_user = MIMEMultipart()
         msg_user['From']    = EMAIL_ADDRESS
         msg_user['To']      = email
         msg_user['Subject'] = "We received your message — CASIA Detector"
-        body_user = f"""
-        Dear {full_name},
-        Thank you for contacting us.
-        We have received your message and will respond as soon as possible.
-        Best regards,
-        CASIA Detector Team
-        """
-        msg_user.attach(MIMEText(body_user, 'plain'))
+        msg_user.attach(MIMEText(
+            f"Dear {full_name},\n\nThank you for contacting us.\n\nBest regards,\nCASIA Detector Team",
+            'plain'))
         server.send_message(msg_user)
         server.quit()
-
         flash("Your message has been sent successfully!", "success")
-        return redirect(url_for('contact'))
-
     except Exception as e:
         print(e)
         flash("Something went wrong. Please try again.", "danger")
-        return redirect(url_for('contact'))
+    return redirect(url_for('contact'))
 
 
 if __name__ == '__main__':
