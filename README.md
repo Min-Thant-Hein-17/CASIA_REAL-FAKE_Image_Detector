@@ -3,3 +3,5 @@ This is the Final Project repository from the Advanced Machine Learning class. T
 
 
 Note: Since my model.keras file size is too big, and I cannot upload the model file. I only uploaded .ipynb model file, by running all the code, it will generate/ create the model.keras file! 
+
+Dataset: https://www.kaggle.com/code/shaft49/real-vs-fake-images-casia-dataset 
