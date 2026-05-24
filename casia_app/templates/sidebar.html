@@ -1,0 +1,18 @@
+<div class="sidebar">
+    <h3>Navigation</h3>
+    <ul>
+        <li><a href="{{ url_for('home') }}">🏠 Home</a></li>
+        <li><a href="{{ url_for('predict') }}">🔍 Detect Image</a></li>
+        <li><a href="{{ url_for('about') }}">📊 About the Model</a></li>
+        <li><a href="{{ url_for('contact') }}">✉ Contact</a></li>
+    </ul>
+
+    <div class="sidebar-info">
+        <h4>Model Info</h4>
+        <p><strong>Type:</strong> CNN (3-Block)</p>
+        <p><strong>Input:</strong> 128 × 128 × 3</p>
+        <p><strong>Classes:</strong> Real / Fake</p>
+        <p><strong>Dataset:</strong> CASIA2</p>
+        <p><strong>Images:</strong> 12,614</p>
+    </div>
+</div>

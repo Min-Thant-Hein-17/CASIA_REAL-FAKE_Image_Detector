@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="about-container">
+
+    <h2>📊 About the Model</h2>
+    <p class="subtitle">Technical details of the CNN model used for image tampering detection.</p>
+
+    <div class="about-grid">
+
+        <div class="about-card">
+            <h3>🗂 Dataset</h3>
+            <table class="about-table">
+                <tr><td>Name</td><td>CASIA2 (Image Tampering Detection)</td></tr>
+                <tr><td>Real Images</td><td>7,491 (Authentic)</td></tr>
+                <tr><td>Fake Images</td><td>5,123 (Tampered)</td></tr>
+                <tr><td>Total</td><td>12,614 images</td></tr>
+                <tr><td>Input Size</td><td>128 × 128 × 3 (RGB)</td></tr>
+                <tr><td>Source</td><td>Kaggle — sophatvathana/casia-dataset</td></tr>
+            </table>
+        </div>
+
+        <div class="about-card">
+            <h3>🧠 Model Architecture</h3>
+            <table class="about-table">
+                <tr><td>Type</td><td>CNN (Convolutional Neural Network)</td></tr>
+                <tr><td>Blocks</td><td>3 Conv blocks (32 → 64 → 128 filters)</td></tr>
+                <tr><td>Regularization</td><td>BatchNormalization + Dropout</td></tr>
+                <tr><td>Dense Layer</td><td>512 units + Dropout(0.5)</td></tr>
+                <tr><td>Output</td><td>Softmax — 2 classes</td></tr>
+                <tr><td>Classification</td><td>Binary (Real vs Fake)</td></tr>
+            </table>
+        </div>
+
+        <div class="about-card">
+            <h3>⚙ Training Config</h3>
+            <table class="about-table">
+                <tr><td>Optimizer</td><td>Adam</td></tr>
+                <tr><td>Loss</td><td>Categorical Cross-Entropy</td></tr>
+                <tr><td>Epochs</td><td>30 (max)</td></tr>
+                <tr><td>Batch Size</td><td>32</td></tr>
+                <tr><td>Early Stopping</td><td>patience=7</td></tr>
+                <tr><td>ReduceLROnPlateau</td><td>factor=0.5, patience=3</td></tr>
+            </table>
+        </div>
+
+        <div class="about-card">
+            <h3>📈 Data Augmentation</h3>
+            <table class="about-table">
+                <tr><td>Rotation</td><td>± 15°</td></tr>
+                <tr><td>Width Shift</td><td>10%</td></tr>
+                <tr><td>Height Shift</td><td>10%</td></tr>
+                <tr><td>Horizontal Flip</td><td>Enabled</td></tr>
+                <tr><td>Normalization</td><td>Pixel / 255.0</td></tr>
+                <tr><td>Train / Val / Test</td><td>72% / 8% / 20%</td></tr>
+            </table>
+        </div>
+
+    </div>
+
+    <div class="about-pipeline">
+        <h3>🔄 End-to-End ML Pipeline</h3>
+        <div class="pipeline-steps">
+            <div class="pipe-step">Data Collection<br><small>Kaggle API</small></div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-step">Preprocessing<br><small>Resize + Normalize</small></div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-step">Augmentation<br><small>ImageDataGenerator</small></div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-step">CNN Training<br><small>TensorFlow/Keras</small></div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-step">Evaluation<br><small>Precision, Recall, F1</small></div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-step">Deployment<br><small>Flask + Azure</small></div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

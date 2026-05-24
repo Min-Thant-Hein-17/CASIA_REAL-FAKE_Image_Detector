@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="home-container">
+
+    <div class="home-hero">
+        <h2>Welcome to CASIA Image Detector</h2>
+        <p class="subtitle">An advanced deep learning application that detects whether an image is <strong>real (authentic)</strong> or <strong>fake (tampered)</strong> using a trained Convolutional Neural Network.</p>
+    </div>
+
+    <div class="home-cards">
+        <div class="home-card">
+            <div class="card-icon">🧠</div>
+            <h3>Deep Learning Model</h3>
+            <p>3-Block CNN architecture with BatchNormalization, Dropout, and Data Augmentation for robust image analysis.</p>
+        </div>
+        <div class="home-card">
+            <div class="card-icon">🗂</div>
+            <h3>CASIA2 Dataset</h3>
+            <p>Trained on 7,491 authentic images and 5,123 tampered images from the CASIA Image Tampering Detection dataset.</p>
+        </div>
+        <div class="home-card">
+            <div class="card-icon">⚡</div>
+            <h3>Instant Detection</h3>
+            <p>Upload any image and receive an instant prediction with confidence scores showing the probability of tampering.</p>
+        </div>
+    </div>
+
+    <div class="home-steps">
+        <h3>How It Works</h3>
+        <div class="steps-grid">
+            <div class="step">
+                <span class="step-num">01</span>
+                <p>Upload your image using the <strong>Detect Image</strong> page</p>
+            </div>
+            <div class="step">
+                <span class="step-num">02</span>
+                <p>The CNN model preprocesses and analyzes the image</p>
+            </div>
+            <div class="step">
+                <span class="step-num">03</span>
+                <p>View the result with confidence scores for Real vs Fake</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="home-cta">
+        <a href="{{ url_for('predict') }}" class="btn-cta">Start Detecting →</a>
+    </div>
+
+</div>
+{% endblock %}

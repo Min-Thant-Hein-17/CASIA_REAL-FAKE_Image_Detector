@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="predict-wrapper">
+    <div class="predict-card">
+        <h2>🔍 Detect Real or Fake Image</h2>
+        <p class="subtitle">Upload an image and our CNN model will analyze whether it has been tampered with.</p>
+
+        {% if error %}
+        <div class="flash-message danger">⚠ {{ error }}</div>
+        {% endif %}
+
+        <form action="/predict" method="POST" enctype="multipart/form-data" class="prediction-form" id="upload-form">
+
+            <div class="upload-zone" id="upload-zone">
+                <div class="upload-icon">📁</div>
+                <p class="upload-text">Drag & drop an image here</p>
+                <p class="upload-sub">or click to browse files</p>
+                <input type="file" name="image" id="file-input" accept="image/*" required>
+
+                <div id="preview-wrap" style="display:none; margin-top:15px;">
+                    <img id="preview-img" src="" alt="Preview" style="max-height:180px; max-width:100%; border-radius:8px; border:2px solid #87CEEB;">
+                    <p id="preview-name" style="font-size:13px; color:#666; margin-top:8px;"></p>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-predict" id="submit-btn">
+                Analyze Image
+            </button>
+        </form>
+
+        <!-- Results Section -->
+        {% if prediction %}
+        <div class="result-section">
+            <div class="result-image-preview">
+                <img src="{{ img_src }}" alt="Analyzed Image">
+            </div>
+
+            <div class="result-details">
+                <div class="result-box {% if is_fake %}result-fake{% else %}result-real{% endif %}">
+                    <p class="result-label">Detection Result</p>
+                    <h3 class="result-verdict">{{ prediction }}</h3>
+                    <p class="result-confidence">Confidence: <strong>{{ confidence }}%</strong></p>
+                </div>
+
+                <div class="prob-section">
+                    <p class="prob-title">Probability Breakdown</p>
+
+                    <div class="prob-row">
+                        <span class="prob-label">Real (Authentic)</span>
+                        <div class="prob-bar-bg">
+                            <div class="prob-bar real-bar" style="width: {{ prob_real }}%"></div>
+                        </div>
+                        <span class="prob-pct">{{ prob_real }}%</span>
+                    </div>
+
+                    <div class="prob-row">
+                        <span class="prob-label">Fake (Tampered)</span>
+                        <div class="prob-bar-bg">
+                            <div class="prob-bar fake-bar" style="width: {{ prob_fake }}%"></div>
+                        </div>
+                        <span class="prob-pct">{{ prob_fake }}%</span>
+                    </div>
+                </div>
+
+                <div class="result-note {% if is_fake %}note-fake{% else %}note-real{% endif %}">
+                    {% if is_fake %}
+                    ⚠ This image shows signs of tampering or digital manipulation.
+                    {% else %}
+                    ✓ This image appears to be authentic with no signs of tampering detected.
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+<script>
+const uploadZone = document.getElementById("upload-zone");
+const fileInput  = document.getElementById("file-input");
+const previewWrap = document.getElementById("preview-wrap");
+const previewImg = document.getElementById("preview-img");
+const previewName = document.getElementById("preview-name");
+
+fileInput.addEventListener("change", () => {
+    const file = fileInput.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            previewImg.src = e.target.result;
+            previewName.textContent = file.name;
+            previewWrap.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+uploadZone.addEventListener("dragover", e => { e.preventDefault(); uploadZone.classList.add("drag-over"); });
+uploadZone.addEventListener("dragleave", () => uploadZone.classList.remove("drag-over"));
+uploadZone.addEventListener("drop", e => {
+    e.preventDefault();
+    uploadZone.classList.remove("drag-over");
+    const file = e.dataTransfer.files[0];
+    if (file) {
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        fileInput.files = dt.files;
+        const reader = new FileReader();
+        reader.onload = ev => {
+            previewImg.src = ev.target.result;
+            previewName.textContent = file.name;
+            previewWrap.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+document.getElementById("upload-form").addEventListener("submit", () => {
+    document.getElementById("submit-btn").textContent = "Analyzing...";
+    document.getElementById("submit-btn").disabled = true;
+});
+</script>
+
+{% endblock %}
